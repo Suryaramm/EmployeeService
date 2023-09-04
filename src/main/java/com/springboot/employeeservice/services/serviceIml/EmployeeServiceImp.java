@@ -1,22 +1,39 @@
 package com.springboot.employeeservice.services.serviceIml;
 
+import com.springboot.employeeservice.dto.APIResponseDto;
+import com.springboot.employeeservice.dto.DepartmentDto;
 import com.springboot.employeeservice.dto.EmployeeDto;
 import com.springboot.employeeservice.entity.Employe;
 import com.springboot.employeeservice.mapper.EmployeeMapper;
 import com.springboot.employeeservice.repository.EmployeRepository;
+import com.springboot.employeeservice.services.APIClient;
 import com.springboot.employeeservice.services.EmployeService;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+
+
 public class EmployeeServiceImp implements EmployeService {
-
+@Autowired
     private EmployeRepository employeRepository;
+@Autowired
+    private APIClient apiClient;
 
-    public EmployeeServiceImp(EmployeRepository employeRepository) {
-        this.employeRepository = employeRepository;
+//    public EmployeeServiceImp(EmployeRepository employeRepository) {
+//        this.employeRepository = employeRepository;
+//    }
+//    public EmployeeServiceImp(EmployeRepository employeRepository, APIClient apiClient) {
+//        this.employeRepository = employeRepository;
+//        this.apiClient = apiClient;
+//    }
+
+    public EmployeeServiceImp() {
     }
 
     @Override
@@ -24,28 +41,40 @@ public class EmployeeServiceImp implements EmployeService {
         Employe employee=new Employe(employeeDto.getId(),
                 employeeDto.getFirstName(),
                 employeeDto.getLastName(),
-                employeeDto.getEmail()
+                employeeDto.getEmail(),
+                employeeDto.getDepartmentCode()
+
         );
         Employe savedEmployee= employeRepository.save(employee);
        EmployeeDto employeeDto1=new EmployeeDto(
                savedEmployee.getId(),
                savedEmployee.getFirstName(),
                savedEmployee.getLastName(),
-               savedEmployee.getEmail()
+               savedEmployee.getEmail(),
+               savedEmployee.getDepartmentCode()
 
        );
        return employeeDto1;
     }
 
     @Override
-    public EmployeeDto getEmployeeById(Long id) {
+    public APIResponseDto getEmployeeById(Long id) {
      Employe employe = employeRepository.findById(id).get();
+
+    DepartmentDto departmentDto= apiClient.getDepartmentByCode(employe.getDepartmentCode());
         EmployeeDto employeeDto=new EmployeeDto(employe.getId(),
                 employe.getFirstName(),
                 employe.getLastName(),
-                employe.getEmail()
+                employe.getEmail(),
+                employe.getDepartmentCode()
+
+
+
         );
-        return employeeDto;
+        APIResponseDto apiResponseDto = new APIResponseDto();
+        apiResponseDto.setEmployee(employeeDto);
+        apiResponseDto.setDepartment(departmentDto);
+        return apiResponseDto;
     }
 
     @Override
